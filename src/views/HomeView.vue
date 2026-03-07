@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import TheWelcome from '../components/TheWelcome.vue'
+import MealForm from '@/components/MealForm.vue';
 </script>
 
 <template>
-  <main>
-    <TheWelcome />
+  <main class="flex justify-center">
+    <MealForm />
   </main>
 </template>
