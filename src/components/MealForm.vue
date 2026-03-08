@@ -1,18 +1,24 @@
 <script lang="ts" setup>
-import { ref } from 'vue';
+import { ref, watch, computed } from 'vue';
 import dayjs from 'dayjs';
 import type { MealEntry, MealType } from '@/types/meal-plan.types';
 import { mealPlannerService } from '@/services/mealPlanner.service';
 import { useMealPlannerStore } from '@/stores/mealPlanner.store';
+import ToastComponent from './ToastComponent.vue';
+import { useMeal } from '@/composables/useMeal';
+
+const mealStore = useMealPlannerStore();
+const { mealTypes } = mealStore;
+const selectedDate = computed(() => mealStore.selectedDate);
+
+const { addMeal } = useMeal();
 
 const mealName = ref<string>('');
 const mealIngredients = ref<string>('');
 const mealType = ref<MealType>('almuerzo' as MealType);
-const mealDate = ref<string>(dayjs().format('YYYY-MM-DD'));
+const mealDate = ref<string>(selectedDate.value || dayjs().format('YYYY-MM-DD'));
 const mealNotes = ref<string>('');
-const mealStore = useMealPlannerStore();
 
-const { mealTypes } = mealStore;
 
 const handleMealSubmit = () => {
   const newMeal: MealEntry = {
@@ -23,12 +29,16 @@ const handleMealSubmit = () => {
     date: mealDate.value
   };
   mealPlannerService.saveMeals([newMeal]);
-  mealStore.addMeal(newMeal);
+  addMeal(newMeal);
 }
+
+watch(selectedDate, (newDate) => {
+  mealDate.value = newDate || dayjs().format('YYYY-MM-DD');
+}, { deep: true })
 </script>
 
 <template>
-  <div class="w-2/3 mx-auto mt-10 py-6 px-20 bg-white rounded-lg shadow-md">
+  <div class="w-2/3 mx-auto mt-10 py-6 px-20 bg-white rounded-lg shadow-md relative">
     <h1 class="text-2xl font-bold mb-6">Añadir comida</h1>
     <form class="flex flex-col gap-3" @submit.prevent="handleMealSubmit">
       <div class="flex flex-col">
@@ -77,10 +87,11 @@ const handleMealSubmit = () => {
       </div>
       <button
         type="submit"
-        class="w-2/6 self-end inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
-        Añadir comida
+        class="add-meal-button">
+        Agregar Comida
       </button>
     </form>
+    <ToastComponent v-if="mealStore.toastMessage" :message="mealStore.toastMessage" :theme="mealStore.toastTheme" />
   </div>
 </template>
 

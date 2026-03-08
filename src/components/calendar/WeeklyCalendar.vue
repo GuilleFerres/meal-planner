@@ -1,28 +1,26 @@
 <script setup lang="ts">
 import { useMealPlannerStore } from '@/stores/mealPlanner.store'
-import { useCalendar } from '@/composables/useCalendar'
+import { useWeeklyCalendar } from '@/composables/useWeeklyCalendar'
 import CalendarHeader from './CalendarHeader.vue'
 import CalendarGrid from './CalendarGrid.vue'
 
-
 const store = useMealPlannerStore()
-const { monthLabel, calendarCells } = useCalendar()
+const { weekLabel, weekCells } = useWeeklyCalendar()
 </script>
 
 <template>
   <section>
     <CalendarHeader
-      :title="monthLabel"
-      @previous="store.goToPreviousMonth"
-      @next="store.goToNextMonth"
+      :title="weekLabel"
+      @previous="store.goToPreviousWeek"
+      @next="store.goToNextWeek"
     />
 
     <CalendarGrid
-      :cells="calendarCells"
+      :cells="weekCells"
       :get-meals-by-date="store.mealsByDate"
-      :is-weekly="false"
+      :is-weekly="true"
       @select="store.setSelectedDate"
     />
-
   </section>
 </template>

@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import 'dayjs/locale/es'
 import type { CalendarCell } from '../types/calendar.types'
 
 export function formatDate(date: Date | string): string {
@@ -6,7 +7,7 @@ export function formatDate(date: Date | string): string {
 }
 
 export function getMonthLabel(baseDate: string): string {
-  return dayjs(baseDate).format('MMMM YYYY')
+  return dayjs(baseDate).locale('es').format('MMMM YYYY')
 }
 
 export function getMonthGrid(baseDate: string, selectedDate: string): CalendarCell[] {
@@ -61,6 +62,31 @@ export function getMonthGrid(baseDate: string, selectedDate: string): CalendarCe
       isSelected: date === selectedDate,
     })
   }
-
   return cells
+}
+
+export function getWeekLabel(baseDate: string): string {
+  const startOfWeek = dayjs(baseDate).startOf('week')
+  const endOfWeek = dayjs(baseDate).endOf('week')
+  return `${startOfWeek.format('DD MMM')} - ${endOfWeek.format('DD MMM YYYY')}`
+}
+
+export function getWeekGrid(baseDate: string, selectedDate: string): CalendarCell[] {
+  const startOfWeek = dayjs(baseDate).startOf('week')
+  const cells: CalendarCell[] = []
+  const today = dayjs().format('YYYY-MM-DD')
+
+  for (let i = 0; i < 7; i++) {
+    const date = startOfWeek.add(i, 'day').format('YYYY-MM-DD')
+    const dayNumber = dayjs(date).date()
+
+    cells.push({
+      date,
+      dayNumber,
+      isCurrentMonth: true, // Para semana, todos son del mes actual o no, pero simplificar
+      isToday: date === today,
+      isSelected: date === selectedDate,
+    })
+  }
+ return cells
 }
