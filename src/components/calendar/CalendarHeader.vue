@@ -1,8 +1,7 @@
 <script setup lang="ts">
-const props = defineProps<{
+defineProps<{
   title: string
 }>()
-const { title } = props
 
 const emit = defineEmits<{
   previous: []
