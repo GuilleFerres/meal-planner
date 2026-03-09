@@ -19,7 +19,6 @@ const mealType = ref<MealType>('almuerzo' as MealType);
 const mealDate = ref<string>(selectedDate.value || dayjs().format('YYYY-MM-DD'));
 const mealNotes = ref<string>('');
 
-
 const handleMealSubmit = () => {
   const newMeal: MealEntry = {
     id: Date.now().toString(),
@@ -30,6 +29,15 @@ const handleMealSubmit = () => {
   };
   mealPlannerService.saveMeals([newMeal]);
   addMeal(newMeal);
+  resetForm();
+}
+
+const resetForm = () => {
+  mealName.value = '';
+  mealIngredients.value = '';
+  mealType.value = 'almuerzo' as MealType;
+  mealDate.value = selectedDate.value || dayjs().format('YYYY-MM-DD');
+  mealNotes.value = '';
 }
 
 watch(selectedDate, (newDate) => {

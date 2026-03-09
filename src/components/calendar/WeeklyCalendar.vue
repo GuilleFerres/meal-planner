@@ -9,7 +9,7 @@ const { weekLabel, weekCells } = useWeeklyCalendar()
 </script>
 
 <template>
-  <section>
+  <section class="w-full">
     <CalendarHeader
       :title="weekLabel"
       @previous="store.goToPreviousWeek"
