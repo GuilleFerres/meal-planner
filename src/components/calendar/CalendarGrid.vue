@@ -24,6 +24,12 @@ const closeModal = () => {
   showModal.value = false
 }
 
+const deleteMeal = ({ mealId }: { mealId: string }) => {
+  if(!mealId) return;
+  store.deleteMeal(mealId)
+
+}
+
 watch(() => store.selectedDate, (newDate) => {
   showModal.value = !!newDate
 })
@@ -34,7 +40,8 @@ watch(() => store.selectedDate, (newDate) => {
     <div class="calendar-grid bg-white rounded-lg shadow-md py-6 px-10"
       :class="{
         'gap-4': !isWeekly,
-        'gap-0': isWeekly
+        'gap-0': isWeekly,
+        'is-weekly': isWeekly
       }">
       <CalendarDayCell
         v-for="cell in cells"
@@ -43,6 +50,7 @@ watch(() => store.selectedDate, (newDate) => {
         :meals="getMealsByDate(cell.date || '')"
         :is-weekly="isWeekly"
         @select="emit('select', $event)"
+        @delete="deleteMeal($event)"
       />
     </div>
     <DaySelected v-if="showModal" @close="closeModal()" />
@@ -53,5 +61,8 @@ watch(() => store.selectedDate, (newDate) => {
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+ &.is-weekly {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 </style>

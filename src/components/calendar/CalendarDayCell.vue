@@ -1,18 +1,37 @@
 <script setup lang="ts">
+import { computed } from 'vue'
 import type { CalendarCell } from '@/types/calendar.types'
 import type { MealEntry } from '@/types/meal-plan.types'
 import { capitalizeFirstLetter } from '@/utils/capitalize.utils'
 
-defineProps<{
+const props = defineProps<{
   cell: CalendarCell
   meals: MealEntry[],
   isWeekly?: boolean
 }>()
 
-
 const emit = defineEmits<{
-  select: [date: string]
+  select: [date: string],
+  delete: [{ mealId: string }]
 }>()
+
+const mealTypeOrder = ['desayuno', 'snack', 'almuerzo', 'cena']
+
+const sortedMeals = computed(() => {
+  return [...props.meals].sort((a, b) => {
+    const indexA = mealTypeOrder.indexOf(a.type.toLowerCase())
+    const indexB = mealTypeOrder.indexOf(b.type.toLowerCase())
+    return (indexA === -1 ? mealTypeOrder.length : indexA) - (indexB === -1 ? mealTypeOrder.length : indexB)
+  })
+})
+
+const viewDetails = () => {
+  emit('select', props.cell.date || '')
+}
+
+const deleteDish = (meal: MealEntry) => {
+  emit('delete', { mealId: meal.id })
+}
 </script>
 
 <template>
@@ -22,19 +41,32 @@ const emit = defineEmits<{
       'is-outside': !cell.isCurrentMonth,
       'is-today': cell.isToday,
       'is-selected': cell.isSelected,
-      'is-weekly': isWeekly,
-      'border-radius': !isWeekly
+      'is-weekly': isWeekly
     }"
-    @click="emit('select', cell.date || '')"
+    @click="!isWeekly ? emit('select', cell.date || '') : null"
   >
     <span>{{ cell.dayNumber }}</span>
     <span v-if="meals.length && isWeekly" class="has-meal">
-      <ul v-for="meal of meals" :key="meal.id">
-        <li>
-          <span class="text-sm font-bold">
-            {{capitalizeFirstLetter(meal.type)}}:
+      <ul>
+        <li v-for="meal of sortedMeals" :key="meal.id">
+          <span class="text-sm">
+            <i class="type">
+              {{capitalizeFirstLetter(meal.type)}}
+            </i>
           </span>
-          {{ meal.name }}
+          <span>
+            {{ meal.name }}
+          </span>
+          <span class="ml-4 actions">
+            <i
+              class="fa-regular fa-eye icon-eye"
+              @click="viewDetails()">
+            </i>
+            <i
+              class="fa-regular fa-trash-can icon-trash"
+              @click="deleteDish(meal)">
+            </i>
+          </span>
         </li>
       </ul>
     </span>
@@ -45,7 +77,7 @@ const emit = defineEmits<{
   .calendar-day-cell {
     padding: 0.5rem;
     aspect-ratio: 1/1;
-    cursor: pointer;
+
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -53,14 +85,12 @@ const emit = defineEmits<{
   }
 
   .calendar-day-cell.is-weekly {
-    aspect-ratio: auto;
-    min-height: 180px;
     padding: 1rem;
     align-items: flex-start;
     overflow-y: auto;
   }
 
-  .calendar-day-cell:hover {
+  .calendar-day-cell:hover:not(.is-weekly):not(.is-today) {
     background-color: #e9e9e9;
   }
 
@@ -75,6 +105,7 @@ const emit = defineEmits<{
   }
   .calendar-day-cell:not(.is-weekly).is-today {
     border-radius: 50%;
+     cursor: pointer;
   }
 
   .is-selected {
@@ -95,14 +126,27 @@ const emit = defineEmits<{
 
   .calendar-day-cell.is-weekly ul {
     width: 100%;
-    margin: 0;
     list-style: none;
     font-size: 0.85rem;
+    margin-top: 1rem;
   }
 
   .calendar-day-cell.is-weekly li {
-    margin: 0.25rem 0;
-    word-break: break-word;
+    padding: 1rem 0;
+    border-top: 1px solid #eee;
+    text-align: start;
+    display: flex;
+    justify-content: space-between;
+    position: relative; /* allow absolute children */
+  }
+
+  .calendar-day-cell.is-weekly li .actions {
+    opacity: 0;
+    transition: opacity 0.2s ease;
+  }
+
+  .calendar-day-cell.is-weekly li:hover .actions {
+    opacity: 1;
   }
 
   .calendar-day-cell:not(.is-weekly) .has-meal {
@@ -111,5 +155,19 @@ const emit = defineEmits<{
     height: 8px;
     background-color: #eeea0e;
     border-radius: 50%;
+  }
+  .type {
+    font-weight: 900;
+    margin-right: 0.75rem;
+  }
+
+  .icon-eye, .icon-trash {
+    font-size: 1rem;
+    cursor: pointer;
+  }
+
+  .icon-trash {
+    margin-left: 0.5rem;
+    color: white;
   }
 </style>
