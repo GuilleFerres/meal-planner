@@ -6,6 +6,7 @@ import CalendarGrid from './CalendarGrid.vue'
 
 const store = useMealPlannerStore()
 const { weekLabel, weekCells } = useWeeklyCalendar()
+
 </script>
 
 <template>
@@ -20,7 +21,6 @@ const { weekLabel, weekCells } = useWeeklyCalendar()
       :cells="weekCells"
       :get-meals-by-date="store.mealsByDate"
       :is-weekly="true"
-      @select="store.setSelectedDate"
     />
   </section>
 </template>

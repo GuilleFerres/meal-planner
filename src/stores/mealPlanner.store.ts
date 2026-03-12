@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 import dayjs from 'dayjs'
-import type { MealEntry } from '@/types/meal-plan.types'
+import type { MealEntry, FavoriteDishes } from '@/types/meal-plan.types'
 import { mealPlannerService } from '@/services/mealPlanner.service.ts'
 
 export const useMealPlannerStore = defineStore('mealPlanner', () => {
@@ -13,6 +13,12 @@ export const useMealPlannerStore = defineStore('mealPlanner', () => {
   const mealTypes = ['desayuno', 'almuerzo', 'cena', 'snack']
   const toastMessage = ref('')
   const toastTheme = ref<'success' | 'error' | 'info'>('success')
+  const favoriteDishes = ref<FavoriteDishes>({
+    dishes: [],
+    totalCount: 0,
+    lastUpdated: undefined
+  })
+  const selectedMeal = ref<MealEntry | null>(null)
 
   const mealsByDate = computed(() => {
     return (date: string) => meals.value.filter(meal => meal.date === date)
@@ -24,6 +30,10 @@ export const useMealPlannerStore = defineStore('mealPlanner', () => {
 
   const setSelectedDate = (date: string) => {
     selectedDate.value = date
+  }
+
+  const setSelectedMeal = (meal: MealEntry | null) => {
+    selectedMeal.value = meal
   }
 
   const setCurrentMonth = (date: string) => {
@@ -58,6 +68,28 @@ export const useMealPlannerStore = defineStore('mealPlanner', () => {
     mealPlannerService.saveMeals(meals.value)
   }
 
+  const getFavoriteDishes = (): FavoriteDishes => {
+    const favoriteMeals = meals.value.filter((meal): meal is MealEntry & { favorite: true } => meal.favorite === true)
+    favoriteDishes.value = {
+      dishes: favoriteMeals,
+      totalCount: favoriteMeals.length,
+      lastUpdated: dayjs().format('YYYY-MM-DD HH:mm:ss')
+    }
+    return favoriteDishes.value
+  }
+
+  const addFavoriteMeal = (meal: MealEntry) => {
+    try {
+      toastMessage.value = 'Comida agregada a favoritos exitosamente'
+      toastTheme.value = 'success'
+    } catch (error) {
+      toastMessage.value = 'Error al agregar la comida a favoritos'
+      toastTheme.value = 'error'
+    }
+    meals.value.push(meal)
+    mealPlannerService.saveMeals(meals.value)
+  }
+
   const setToast = (message: string, theme: 'success' | 'error' | 'info') => {
     toastMessage.value = message
     toastTheme.value = theme
@@ -86,6 +118,8 @@ export const useMealPlannerStore = defineStore('mealPlanner', () => {
     selectedDate,
     currentMonth,
     currentWeek,
+    favoriteDishes,
+    selectedMeal,
     meals,
     mealsByDate,
     init,
@@ -102,6 +136,8 @@ export const useMealPlannerStore = defineStore('mealPlanner', () => {
     toastMessage,
     toastTheme,
     cleanToast,
-    setToast
+    setToast,
+    getFavoriteDishes,
+    setSelectedMeal
   }
 })

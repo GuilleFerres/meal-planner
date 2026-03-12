@@ -7,18 +7,18 @@ export interface MealEntry {
   ingredients?: string
   recipeId?: string
   notes?: string
-  completed?: boolean
+  completed?: boolean,
+  favorite?: boolean,
 }
 
-export interface MealDay {
-  date: string
-  meals: MealEntry[]
+export interface FavoriteMealEntry extends MealEntry {
+  favorite: true
 }
 
-export interface MealPlan {
-  id: string
-  name: string
-  startDate: string
-  endDate: string
-  days: MealDay[]
+export interface FavoriteDishes {
+  dishes: FavoriteMealEntry[]
+  totalCount: number
+  lastUpdated?: string
 }
+
+
