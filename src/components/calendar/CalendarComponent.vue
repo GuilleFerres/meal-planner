@@ -21,7 +21,6 @@ const { monthLabel, calendarCells } = useCalendar()
       :cells="calendarCells"
       :get-meals-by-date="store.mealsByDate"
       :is-weekly="false"
-      @select="store.setSelectedDate"
     />
 
   </section>

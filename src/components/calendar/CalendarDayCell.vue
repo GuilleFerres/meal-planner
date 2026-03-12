@@ -12,6 +12,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{
   select: [date: string],
+  selectMeal: [meal: MealEntry | null],
   delete: [{ mealId: string }]
 }>()
 
@@ -25,12 +26,21 @@ const sortedMeals = computed(() => {
   })
 })
 
-const viewDetails = () => {
-  emit('select', props.cell.date || '')
+const viewDetails = (meal: MealEntry) => {
+  props.isWeekly ?
+    emit('selectMeal', meal) :
+    emit('select', props.cell.date || '')
+
 }
 
 const deleteDish = (meal: MealEntry) => {
   emit('delete', { mealId: meal.id })
+}
+
+const openDayDetailsModal = () => {
+  if (!props.isWeekly || props.meals.length === 0 ) {
+    emit('select', props.cell.date || '')
+  }
 }
 </script>
 
@@ -43,7 +53,7 @@ const deleteDish = (meal: MealEntry) => {
       'is-selected': cell.isSelected,
       'is-weekly': isWeekly
     }"
-    @click="!isWeekly ? emit('select', cell.date || '') : null"
+    @click="openDayDetailsModal()"
   >
     <span>{{ cell.dayNumber }}</span>
     <span v-if="meals.length && isWeekly" class="has-meal">
@@ -60,7 +70,7 @@ const deleteDish = (meal: MealEntry) => {
           <span class="ml-4 actions">
             <i
               class="fa-regular fa-eye icon-eye"
-              @click="viewDetails()">
+              @click="viewDetails(meal)">
             </i>
             <i
               class="fa-regular fa-trash-can icon-trash"
@@ -77,7 +87,6 @@ const deleteDish = (meal: MealEntry) => {
   .calendar-day-cell {
     padding: 0.5rem;
     aspect-ratio: 1/1;
-
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -88,6 +97,9 @@ const deleteDish = (meal: MealEntry) => {
     padding: 1rem;
     align-items: flex-start;
     overflow-y: auto;
+    &:not(.is-today) {
+      cursor: pointer;
+    }
   }
 
   .calendar-day-cell:hover:not(.is-weekly):not(.is-today) {

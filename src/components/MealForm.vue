@@ -4,7 +4,7 @@ import dayjs from 'dayjs';
 import type { MealEntry, MealType } from '@/types/meal-plan.types';
 import { mealPlannerService } from '@/services/mealPlanner.service';
 import { useMealPlannerStore } from '@/stores/mealPlanner.store';
-import ToastComponent from './ToastComponent.vue';
+import ToastComponent from '@/components/ui/ToastComponent.vue';
 import { useMeal } from '@/composables/useMeal';
 
 const mealStore = useMealPlannerStore();
@@ -18,6 +18,7 @@ const mealIngredients = ref<string>('');
 const mealType = ref<MealType>('almuerzo' as MealType);
 const mealDate = ref<string>(selectedDate.value || dayjs().format('YYYY-MM-DD'));
 const mealNotes = ref<string>('');
+const isFavorite = ref<boolean>(false);
 
 const handleMealSubmit = () => {
   const newMeal: MealEntry = {
@@ -25,7 +26,8 @@ const handleMealSubmit = () => {
     name: mealName.value,
     ingredients: mealIngredients.value,
     type: mealType.value,
-    date: mealDate.value
+    date: mealDate.value,
+    favorite: isFavorite.value,
   };
   mealPlannerService.saveMeals([newMeal]);
   addMeal(newMeal);
@@ -93,6 +95,10 @@ watch(selectedDate, (newDate) => {
           </textarea>
         </label>
       </div>
+        <div class="flex items-center gap-2 mt-2">
+          <input type="checkbox" id="favorite" v-model="isFavorite" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+          <label for="favorite" class="text-sm text-gray-700">Marcar como favorito</label>
+        </div>
       <button
         type="submit"
         class="add-meal-button">
@@ -104,7 +110,7 @@ watch(selectedDate, (newDate) => {
 </template>
 
 <style lang="scss" scoped>
-input, select, textarea {
+input:not([type="checkbox"]), select, textarea {
   margin-top: 0.25rem;
   display: block;
   width: 100%;

@@ -5,6 +5,7 @@ import type { CalendarCell } from '@/types/calendar.types'
 import type { MealEntry } from '@/types/meal-plan.types'
 import { useMealPlannerStore } from '@/stores/mealPlanner.store'
 import DaySelected from './DaySelected.vue'
+import MealDetailModal from '@/components/meal/MealDetailModal.vue'
 
 const store = useMealPlannerStore()
 
@@ -16,9 +17,9 @@ defineProps<{
 
 const showModal = ref(false)
 
-const emit = defineEmits<{
-  select: [date: string]
-}>()
+// const emit = defineEmits<{
+//   select: [date: string]
+// }>()
 
 const closeModal = () => {
   showModal.value = false
@@ -28,6 +29,11 @@ const deleteMeal = ({ mealId }: { mealId: string }) => {
   if(!mealId) return;
   store.deleteMeal(mealId)
 
+}
+
+const selectedMeal = (meal: MealEntry | null) => {
+  store.setSelectedDate(meal ? meal.date : '')
+  store.setSelectedMeal(meal)
 }
 
 watch(() => store.selectedDate, (newDate) => {
@@ -49,11 +55,13 @@ watch(() => store.selectedDate, (newDate) => {
         :cell="cell"
         :meals="getMealsByDate(cell.date || '')"
         :is-weekly="isWeekly"
-        @select="emit('select', $event)"
+        @select="store.setSelectedDate"
+        @select-meal="selectedMeal($event)"
         @delete="deleteMeal($event)"
       />
     </div>
     <DaySelected v-if="showModal" @close="closeModal()" />
+    <MealDetailModal v-if="store.selectedMeal" @close="selectedMeal(null)" />
   </div>
 </template>
 

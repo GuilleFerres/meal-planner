@@ -2,6 +2,7 @@
 import { computed } from 'vue';
 import { useMealPlannerStore } from '@/stores/mealPlanner.store';
 import { capitalizeFirstLetter } from '@/utils/capitalize.utils';
+import ModalComponent from '@/components/ui/ModalComponent.vue';
 
 const mealStore = useMealPlannerStore();
 const mealsFromSelectDate = computed(() => mealStore.mealsByDate(mealStore.selectedDate));
@@ -14,10 +15,8 @@ const closeModal = () => {
 </script>
 
 <template>
-  <div class="overlay" @click="closeModal">
-    <div class="meals-day-container" @click.stop>
-      <button class="close-button" @click="closeModal">×</button>
-      <h3>Comidas del día:</h3>
+  <ModalComponent :modalTitle="'Comidas del día:'" @close="closeModal">
+    <template #content>
       <div v-if="mealsFromSelectDate.length > 0">
         <div v-for="meal in mealsFromSelectDate" :key="meal.id">
           <h4>{{ capitalizeFirstLetter(meal.type) }}:</h4>
@@ -40,8 +39,8 @@ const closeModal = () => {
           Agregar Comida
         </button>
       </div>
-    </div>
-  </div>
+    </template>
+  </ModalComponent>
 </template>
 
 <style lang="scss" scoped>
@@ -68,21 +67,6 @@ const closeModal = () => {
   position: relative;
 }
 
-.close-button {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  background: none;
-  border: none;
-  font-size: 1.5rem;
-  cursor: pointer;
-}
-
-h3 {
-  font-size: 1.5rem;
-  font-weight: 900;
-  margin-bottom: 0.5rem;
-}
 h4 {
   font-size: 1.25rem;
   font-weight: 600;
