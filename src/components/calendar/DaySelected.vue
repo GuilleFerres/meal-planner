@@ -1,11 +1,15 @@
 <script lang="ts" setup>
-import { computed } from 'vue';
+import { computed, ref } from 'vue';
 import { useMealPlannerStore } from '@/stores/mealPlanner.store';
 import { capitalizeFirstLetter } from '@/utils/capitalize.utils';
 import ModalComponent from '@/components/ui/ModalComponent.vue';
+import MealForm from '@/components/MealForm.vue';
 
 const mealStore = useMealPlannerStore();
+const openForm = ref(false);
+
 const mealsFromSelectDate = computed(() => mealStore.mealsByDate(mealStore.selectedDate));
+
 const emit = defineEmits<{
   close: []
 }>()
@@ -35,10 +39,15 @@ const closeModal = () => {
       </div>
       <div v-else>
         <p>No hay comidas planificadas para este día.</p>
-        <button class="add-meal-button" @click="closeModal">
-          Agregar Comida
-        </button>
       </div>
+      <button class="add-meal-button" @click="openForm = true">
+        Agregar Comida
+      </button>
+    </template>
+  </ModalComponent>
+  <ModalComponent v-if="openForm" :modalTitle="'Agregar Comida'" @close="openForm = false" max-width="90%">
+    <template #content>
+      <MealForm @close="openForm = false" />
     </template>
   </ModalComponent>
 </template>

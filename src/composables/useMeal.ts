@@ -1,5 +1,5 @@
 import { useMealPlannerStore } from '@/stores/mealPlanner.store'
-import type { MealEntry } from '@/types/meal-plan.types'
+import type { MealEntry, MealType } from '@/types/meal-plan.types'
 
 export function useMeal() {
  const mealStore = useMealPlannerStore()
@@ -19,7 +19,7 @@ export function useMeal() {
     const typeExists = mealStore.mealsByDate(meal.date).findIndex((m) => m.type === meal.type)
 
     if(typeExists !== -1) {
-      throw new Error('Tipo de comida inválido')
+      throw new Error('Tipo de comida no válido')
     }
 
     if (!meal.name || meal.name.trim() === '') {
@@ -32,8 +32,16 @@ export function useMeal() {
       throw new Error('El tipo de comida es obligatorio')
     }
   }
+
+  const getAvailableMealTypes = (date: string): MealType[] => {
+    const usedTypes = mealStore.mealsByDate(date).map(meal => meal.type)
+    return mealStore.mealTypes.filter(type => !usedTypes.includes(type))
+  }
+
+
   return {
     addMeal,
-    validateMealEntry
+    validateMealEntry,
+    getAvailableMealTypes
   }
 }

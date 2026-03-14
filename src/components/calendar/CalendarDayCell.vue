@@ -3,6 +3,9 @@ import { computed } from 'vue'
 import type { CalendarCell } from '@/types/calendar.types'
 import type { MealEntry } from '@/types/meal-plan.types'
 import { capitalizeFirstLetter } from '@/utils/capitalize.utils'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faStar } from '@fortawesome/free-regular-svg-icons'
 
 const props = defineProps<{
   cell: CalendarCell
@@ -15,6 +18,8 @@ const emit = defineEmits<{
   selectMeal: [meal: MealEntry | null],
   delete: [{ mealId: string }]
 }>()
+
+library.add(faStar)
 
 const mealTypeOrder = ['desayuno', 'snack', 'almuerzo', 'cena']
 
@@ -38,9 +43,7 @@ const deleteDish = (meal: MealEntry) => {
 }
 
 const openDayDetailsModal = () => {
-  if (!props.isWeekly || props.meals.length === 0 ) {
-    emit('select', props.cell.date || '')
-  }
+  emit('select', props.cell.date || '')
 }
 </script>
 
@@ -70,11 +73,12 @@ const openDayDetailsModal = () => {
           <span class="ml-4 actions">
             <i
               class="fa-regular fa-eye icon-eye"
-              @click="viewDetails(meal)">
+              @click.stop="viewDetails(meal)">
             </i>
+            <FontAwesomeIcon :icon="['far', 'star']" />
             <i
               class="fa-regular fa-trash-can icon-trash"
-              @click="deleteDish(meal)">
+              @click.stop="deleteDish(meal)">
             </i>
           </span>
         </li>
@@ -173,13 +177,15 @@ const openDayDetailsModal = () => {
     margin-right: 0.75rem;
   }
 
-  .icon-eye, .icon-trash {
+  .icon-eye, .icon-trash, .fa-star {
     font-size: 1rem;
     cursor: pointer;
+    @media (max-width: 768px) {
+      font-size: 0.5rem
+    }
   }
 
   .icon-trash {
     margin-left: 0.5rem;
-    color: white;
   }
 </style>

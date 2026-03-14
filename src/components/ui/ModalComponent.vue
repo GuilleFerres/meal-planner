@@ -1,7 +1,9 @@
 <script lang="ts" setup>
+import { computed } from 'vue';
 
-defineProps<{
+const props = defineProps<{
   modalTitle: string,
+  maxWidth?: string
 }>()
 const emit = defineEmits<{
   close: []
@@ -9,11 +11,17 @@ const emit = defineEmits<{
 const closeModal = () => {
   emit('close');
 };
+
+const style = computed(() => {
+  return {
+    maxWidth: props.maxWidth || '400px'
+  }
+})
 </script>
 
 <template>
   <div class="overlay" @click="closeModal">
-    <div class="meals-day-container" @click.stop>
+    <div class="meals-day-container" :style="style" @click.stop>
       <button class="close-button" @click="closeModal">×</button>
       <h3>{{ modalTitle }}</h3>
       <slot name="content"></slot>

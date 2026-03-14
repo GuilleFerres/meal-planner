@@ -13,4 +13,7 @@
 .meals-day-container .add-meal-button {
   @apply w-full mt-2
 }
+button {
+  cursor: pointer;
+}
 
