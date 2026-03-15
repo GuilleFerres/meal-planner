@@ -66,8 +66,9 @@ export function getMonthGrid(baseDate: string, selectedDate: string): CalendarCe
 }
 
 export function getWeekLabel(baseDate: string): string {
-  const startOfWeek = dayjs(baseDate).startOf('week')
-  const endOfWeek = dayjs(baseDate).endOf('week')
+  const startOfWeek = dayjs(baseDate).locale('es').startOf('week')
+  const endOfWeek = dayjs(baseDate).locale('es').endOf('week')
+
   return `${startOfWeek.format('DD MMM')} - ${endOfWeek.format('DD MMM YYYY')}`
 }
 
