@@ -6,6 +6,12 @@ import { capitalizeFirstLetter } from '@/utils/capitalize.utils'
 import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
 import { library } from '@fortawesome/fontawesome-svg-core'
 import { faStar } from '@fortawesome/free-regular-svg-icons'
+import { faStar as faStarSolid } from '@fortawesome/free-solid-svg-icons'
+import { useMealPlannerStore } from '@/stores/mealPlanner.store'
+
+library.add(faStar)
+library.add(faStarSolid)
+const store = useMealPlannerStore()
 
 const props = defineProps<{
   cell: CalendarCell
@@ -18,8 +24,6 @@ const emit = defineEmits<{
   selectMeal: [meal: MealEntry | null],
   delete: [{ mealId: string }]
 }>()
-
-library.add(faStar)
 
 const mealTypeOrder = ['desayuno', 'snack', 'almuerzo', 'cena']
 
@@ -44,6 +48,9 @@ const deleteDish = (meal: MealEntry) => {
 
 const openDayDetailsModal = () => {
   emit('select', props.cell.date || '')
+}
+const isFavorite = (meal: MealEntry) => {
+  return meal.favorite
 }
 </script>
 
@@ -70,12 +77,15 @@ const openDayDetailsModal = () => {
           <span>
             {{ meal.name }}
           </span>
-          <span class="ml-4 actions">
+          <span class="actions">
             <i
               class="fa-regular fa-eye icon-eye"
               @click.stop="viewDetails(meal)">
             </i>
-            <FontAwesomeIcon :icon="['far', 'star']" />
+            <FontAwesomeIcon
+              :icon="isFavorite(meal) ? ['fas', 'star'] : ['far', 'star']"
+              class="fa-star"
+              @click.stop="store.modifyFavoriteMeal(meal, !isFavorite(meal))" />
             <i
               class="fa-regular fa-trash-can icon-trash"
               @click.stop="deleteDish(meal)">
@@ -157,8 +167,12 @@ const openDayDetailsModal = () => {
   }
 
   .calendar-day-cell.is-weekly li .actions {
-    opacity: 0;
-    transition: opacity 0.2s ease;
+    display: flex;
+    gap: 0.5rem;
+    @media screen and (min-width: 768px) {
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
   }
 
   .calendar-day-cell.is-weekly li:hover .actions {
@@ -181,11 +195,7 @@ const openDayDetailsModal = () => {
     font-size: 1rem;
     cursor: pointer;
     @media (max-width: 768px) {
-      font-size: 0.5rem
+      font-size: 0.875rem
     }
-  }
-
-  .icon-trash {
-    margin-left: 0.5rem;
   }
 </style>

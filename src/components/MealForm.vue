@@ -6,7 +6,11 @@ import { mealPlannerService } from '@/services/mealPlanner.service';
 import { useMealPlannerStore } from '@/stores/mealPlanner.store';
 import ToastComponent from '@/components/ui/ToastComponent.vue';
 import { useMeal } from '@/composables/useMeal';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faPlus } from '@fortawesome/free-solid-svg-icons'
 
+library.add(faPlus)
 const mealStore = useMealPlannerStore();
 const { addMeal, getAvailableMealTypes } = useMeal();
 const selectedDate = computed(() => mealStore.selectedDate);
@@ -108,7 +112,8 @@ watch(selectedDate, (newDate) => {
       <button
         type="submit"
         class="add-meal-button">
-        Agregar Comida
+         <FontAwesomeIcon :icon="['fas', 'plus']" class="text-lg" />
+         <span>Agregar Comida</span>
       </button>
     </form>
     <ToastComponent v-if="mealStore.toastMessage" :message="mealStore.toastMessage" :theme="mealStore.toastTheme" />
@@ -131,5 +136,11 @@ input:focus, select:focus, textarea:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+.add-meal-button {
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 </style>

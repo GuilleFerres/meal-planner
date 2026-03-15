@@ -32,6 +32,7 @@ const style = computed(() => {
 <style lang="scss" scoped>
 .overlay {
   position: fixed;
+  overflow-y: scroll;
   top: 0;
   left: 0;
   width: 100%;

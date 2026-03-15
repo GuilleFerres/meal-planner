@@ -78,16 +78,8 @@ export const useMealPlannerStore = defineStore('mealPlanner', () => {
     return favoriteDishes.value
   }
 
-  const addFavoriteMeal = (meal: MealEntry) => {
-    try {
-      toastMessage.value = 'Comida agregada a favoritos exitosamente'
-      toastTheme.value = 'success'
-    } catch (error) {
-      toastMessage.value = 'Error al agregar la comida a favoritos'
-      toastTheme.value = 'error'
-    }
-    meals.value.push(meal)
-    mealPlannerService.saveMeals(meals.value)
+  const modifyFavoriteMeal = (meal: MealEntry, status: boolean) => {
+    meals.value = meals.value.map(m => m.id === meal.id ? { ...m, favorite: status } : m)
   }
 
   const setToast = (message: string, theme: 'success' | 'error' | 'info') => {
@@ -185,7 +177,8 @@ export const useMealPlannerStore = defineStore('mealPlanner', () => {
     setToast,
     getFavoriteDishes,
     setSelectedMeal,
-    exportWeeklyPlan
+    exportWeeklyPlan,
+    modifyFavoriteMeal
   }
 },
  {
