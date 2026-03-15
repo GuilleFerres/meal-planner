@@ -13,10 +13,10 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="favorite-dishes-view p-20">
+  <div class="favorite-dishes-view md:p-20 px-6 py-12">
     <div class="m-auto w-fit px-8 flex flex-col gap-6">
       <h1 class="font-bold text-4xl">Platos favoritos:</h1>
-      <ul v-if="favoriteDishes?.dishes.length > 0">
+      <ul v-if="favoriteDishes?.dishes.length > 0" class="flex gap-4">
         <li v-for="meal of favoriteDishes.dishes" :key="meal.id" class="flex flex-col gap-2">
           <MealCard :meal="meal" />
         </li>

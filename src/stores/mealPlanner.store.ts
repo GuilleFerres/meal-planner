@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 
 import dayjs from 'dayjs'
-import type { MealEntry, FavoriteDishes } from '@/types/meal-plan.types'
+import type { MealEntry, FavoriteDishes, MealType } from '@/types/meal-plan.types'
 import { mealPlannerService } from '@/services/mealPlanner.service.ts'
 
 export const useMealPlannerStore = defineStore('mealPlanner', () => {
@@ -10,7 +10,7 @@ export const useMealPlannerStore = defineStore('mealPlanner', () => {
   const currentMonth = ref(dayjs().startOf('month').format('YYYY-MM-DD'))
   const currentWeek = ref(dayjs().startOf('week').format('YYYY-MM-DD'))
   const meals = ref<MealEntry[]>([])
-  const mealTypes = ['desayuno', 'almuerzo', 'cena', 'snack']
+  const mealTypes: MealType[] = ['desayuno', 'almuerzo', 'cena', 'snack']
   const toastMessage = ref('')
   const toastTheme = ref<'success' | 'error' | 'info'>('success')
   const favoriteDishes = ref<FavoriteDishes>({
@@ -78,16 +78,8 @@ export const useMealPlannerStore = defineStore('mealPlanner', () => {
     return favoriteDishes.value
   }
 
-  const addFavoriteMeal = (meal: MealEntry) => {
-    try {
-      toastMessage.value = 'Comida agregada a favoritos exitosamente'
-      toastTheme.value = 'success'
-    } catch (error) {
-      toastMessage.value = 'Error al agregar la comida a favoritos'
-      toastTheme.value = 'error'
-    }
-    meals.value.push(meal)
-    mealPlannerService.saveMeals(meals.value)
+  const modifyFavoriteMeal = (meal: MealEntry, status: boolean) => {
+    meals.value = meals.value.map(m => m.id === meal.id ? { ...m, favorite: status } : m)
   }
 
   const setToast = (message: string, theme: 'success' | 'error' | 'info') => {
@@ -114,6 +106,52 @@ export const useMealPlannerStore = defineStore('mealPlanner', () => {
     mealPlannerService.saveMeals(meals.value)
   }
 
+  const exportWeeklyPlan = () => {
+    const startOfWeek = dayjs(currentWeek.value);
+    let text = `Plan Semanal de Comidas - Semana del ${startOfWeek.format('DD/MM/YYYY')} al ${startOfWeek.add(6, 'day').format('DD/MM/YYYY')}\n\n`;
+
+    for (let i = 0; i < 7; i++) {
+      const day = startOfWeek.add(i, 'day');
+      const dayStr = day.format('YYYY-MM-DD');
+      const dayName = day.locale('es').format('dddd');
+      text += `${dayName.charAt(0).toUpperCase() + dayName.slice(1)} (${day.format('DD/MM')}):\n`;
+
+      const dayMeals = meals.value.filter(meal => meal.date === dayStr);
+      const mealsByType = dayMeals.reduce((acc, meal) => {
+        if (!acc[meal.type]) acc[meal.type] = [];
+        acc[meal.type].push(meal);
+        return acc;
+      }, {} as Record<MealType, MealEntry[]>);
+
+      mealTypes.forEach(type => {
+        const mealsOfType = mealsByType[type] || [];
+        text += `  ${type.charAt(0).toUpperCase() + type.slice(1)}: `;
+        if (mealsOfType.length === 0) {
+          text += 'No planificado\n';
+        } else {
+          mealsOfType.forEach(meal => {
+            text += `${meal.name}`;
+            if (meal.ingredients) text += ` (Ingredientes: ${meal.ingredients})`;
+            if (meal.notes) text += ` - Notas: ${meal.notes}`;
+            text += '\n';
+          });
+        }
+      });
+      text += '\n';
+    }
+
+    // Crear y descargar el archivo
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const element = document.createElement('a');
+    element.href = url;
+    element.download = `plan-semanal-${startOfWeek.format('YYYY-MM-DD')}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    URL.revokeObjectURL(url);
+  };
+
   return {
     selectedDate,
     currentMonth,
@@ -138,6 +176,14 @@ export const useMealPlannerStore = defineStore('mealPlanner', () => {
     cleanToast,
     setToast,
     getFavoriteDishes,
-    setSelectedMeal
+    setSelectedMeal,
+    exportWeeklyPlan,
+    modifyFavoriteMeal
   }
+},
+ {
+  persist: {
+    storage: sessionStorage,
+    pick: ['meals', 'favoriteDishes'],
+  },
 })

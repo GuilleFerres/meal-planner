@@ -32,9 +32,13 @@ const deleteMeal = ({ mealId }: { mealId: string }) => {
 }
 
 const selectedMeal = (meal: MealEntry | null) => {
-  store.setSelectedDate(meal ? meal.date : '')
+  // When selecting a specific meal, only show the meal detail modal.
+  // Closing any open day modal by clearing the selected date.
+  store.setSelectedDate('')
   store.setSelectedMeal(meal)
 }
+
+const dayInitials = ['L', 'M', 'X', 'J', 'V', 'S', 'D']
 
 watch(() => store.selectedDate, (newDate) => {
   showModal.value = !!newDate
@@ -43,9 +47,12 @@ watch(() => store.selectedDate, (newDate) => {
 
 <template>
   <div class="relative">
-    <div class="calendar-grid bg-white rounded-lg shadow-md py-6 px-10"
+    <div v-if="!isWeekly" class="day-headers px-10">
+      <div v-for="day in dayInitials" :key="day" class="day-header">{{ day }}</div>
+    </div>
+    <div class="calendar-grid bg-white rounded-lg shadow-md py-6 md:px-10 px-2"
       :class="{
-        'gap-4': !isWeekly,
+        'md:gap-4 gap-0': !isWeekly,
         'gap-0': isWeekly,
         'is-weekly': isWeekly
       }">
@@ -66,11 +73,51 @@ watch(() => store.selectedDate, (newDate) => {
 </template>
 
 <style scoped>
+.day-headers {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 4px;
+  margin-bottom: 1rem;
+  font-weight: bold;
+  text-align: center;
+}
+
+.day-header {
+  padding: 0.5rem;
+}
+
 .calendar-grid {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
  &.is-weekly {
     grid-template-columns: repeat(4, 1fr);
   }
+}
+
+@media (max-width: 1024px) {
+  /* .calendar-grid {
+    grid-template-columns: repeat(4, 1fr);
+  } */
+  .calendar-grid.is-weekly {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  /* .calendar-grid {
+    grid-template-columns: repeat(2, 1fr);
+  } */
+  .calendar-grid.is-weekly {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* @media (max-width: 480px) {
+  .calendar-grid {
+    grid-template-columns: 1fr;
+  }
+} */
+.calendar-grid.is-weekly {
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
 }
 </style>

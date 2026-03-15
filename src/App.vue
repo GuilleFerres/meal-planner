@@ -30,7 +30,7 @@ import { RouterLink, RouterView } from 'vue-router'
       text-decoration: none;
       color: white;
       font-weight: 500;
-      transition: color 0.3s;
+      // transition: color 0.3s;
 
       &:hover {
         color: #FFD700;

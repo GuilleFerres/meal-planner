@@ -6,19 +6,27 @@ import { mealPlannerService } from '@/services/mealPlanner.service';
 import { useMealPlannerStore } from '@/stores/mealPlanner.store';
 import ToastComponent from '@/components/ui/ToastComponent.vue';
 import { useMeal } from '@/composables/useMeal';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { library } from '@fortawesome/fontawesome-svg-core'
+import { faPlus } from '@fortawesome/free-solid-svg-icons'
 
+library.add(faPlus)
 const mealStore = useMealPlannerStore();
-const { mealTypes } = mealStore;
+const { addMeal, getAvailableMealTypes } = useMeal();
 const selectedDate = computed(() => mealStore.selectedDate);
-
-const { addMeal } = useMeal();
+const mealDate = ref<string>(selectedDate.value || dayjs().format('YYYY-MM-DD'));
+const availableMealTypes = computed(() => getAvailableMealTypes(mealDate.value) || ['No disponible']);
 
 const mealName = ref<string>('');
 const mealIngredients = ref<string>('');
-const mealType = ref<MealType>('almuerzo' as MealType);
-const mealDate = ref<string>(selectedDate.value || dayjs().format('YYYY-MM-DD'));
+const mealType = ref<MealType>(availableMealTypes.value[0] || 'desayuno');
+
 const mealNotes = ref<string>('');
 const isFavorite = ref<boolean>(false);
+const emit = defineEmits<{
+  close: []
+}>()
+
 
 const handleMealSubmit = () => {
   const newMeal: MealEntry = {
@@ -32,14 +40,16 @@ const handleMealSubmit = () => {
   mealPlannerService.saveMeals([newMeal]);
   addMeal(newMeal);
   resetForm();
+  emit('close');
 }
 
 const resetForm = () => {
   mealName.value = '';
   mealIngredients.value = '';
-  mealType.value = 'almuerzo' as MealType;
+  mealType.value =  availableMealTypes.value[0] && availableMealTypes.value.length > 0 ? availableMealTypes.value[0] : 'desayuno';
   mealDate.value = selectedDate.value || dayjs().format('YYYY-MM-DD');
   mealNotes.value = '';
+  isFavorite.value = false;
 }
 
 watch(selectedDate, (newDate) => {
@@ -48,7 +58,7 @@ watch(selectedDate, (newDate) => {
 </script>
 
 <template>
-  <div class="w-2/3 mx-auto mt-10 py-6 px-20 bg-white rounded-lg shadow-md relative">
+  <div class="md:w-2/3 w-full mx-auto mt-10 py-6 md:px-20 px-6 bg-white rounded-lg shadow-md relative">
     <h1 class="text-2xl font-bold mb-6">Añadir comida</h1>
     <form class="flex flex-col gap-3" @submit.prevent="handleMealSubmit">
       <div class="flex flex-col">
@@ -64,7 +74,7 @@ watch(selectedDate, (newDate) => {
         <select
           id="meal-type"
           v-model="mealType">
-          <option v-for="type in mealTypes" :key="type" :value="type">
+          <option v-for="type in availableMealTypes" :key="type" :value="type">
             {{ type }}
           </option>
         </select>
@@ -102,7 +112,8 @@ watch(selectedDate, (newDate) => {
       <button
         type="submit"
         class="add-meal-button">
-        Agregar Comida
+         <FontAwesomeIcon :icon="['fas', 'plus']" class="text-lg" />
+         <span>Agregar Comida</span>
       </button>
     </form>
     <ToastComponent v-if="mealStore.toastMessage" :message="mealStore.toastMessage" :theme="mealStore.toastTheme" />
@@ -125,5 +136,11 @@ input:focus, select:focus, textarea:focus {
   outline: 2px solid transparent;
   outline-offset: 2px;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+.add-meal-button {
+  width: fit-content;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 </style>

@@ -10,7 +10,7 @@ const { monthLabel, calendarCells } = useCalendar()
 </script>
 
 <template>
-  <section>
+  <section class="m-auto">
     <CalendarHeader
       :title="monthLabel"
       @previous="store.goToPreviousMonth"
