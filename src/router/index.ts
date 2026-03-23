@@ -1,8 +1,9 @@
-import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHashHistory } from 'vue-router'
 import HomeView from '../views/HomeView.vue'
 
 const router = createRouter({
-  history: createWebHistory(import.meta.env.BASE_URL),
+  // Sin argumentos: en el navegador la base es pathname + search (p. ej. /meal-planner/ en GitHub Pages).
+  history: createWebHashHistory(),
   routes: [
     {
       path: '/',
